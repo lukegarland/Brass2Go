@@ -14,11 +14,13 @@
 
 
 // Super loop task function prototypes
-void task_playing();
-void task_analysis();
-void task_startScreen();
-void task_paused();
-void (*task)();
+void task_playing(void);
+void task_analysis(void);
+void task_startScreen(void);
+void task_paused(void);
+void (*task)(void);
+
+void card_removed(void);    // method called when the SD card is removed
 
 #endif	/* MAIN_H */
 

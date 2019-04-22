@@ -1,6 +1,8 @@
+#include "config.h"
 #include "SD.h"
 
 //REQUIRES: SPI interface initialized using SPI_Init.
+//          SD card is present
 //PROMISES: Performs the SD Card initialization process over SPI:
 //          1. Sets CS high and writes 0xFF for 80 cycles.
 //          2. Send CMD0 with argument 0x00000000 until response is 0x01
@@ -8,21 +10,22 @@
 //          4a.Send CMD55 with argument 0x00000000 until response ix 0x00
 //          4b.Send Send CMD41 with argument 0x40000000, if response isn't 0x00
 //             go back to step 4a.
-void SD_Init(void) {
+bool SD_Init(void) {
+    
     //Step 1:
     //Set Chip Select high, and write 0xFF for at least 74 cycles.
     SD_DESELECT();
     
-    SPI_Write(0xFF);
-    SPI_Write(0xFF);
-    SPI_Write(0xFF);
-    SPI_Write(0xFF);
-    SPI_Write(0xFF);
-    SPI_Write(0xFF);
-    SPI_Write(0xFF);
-    SPI_Write(0xFF);
-    SPI_Write(0xFF);
-    SPI_Write(0xFF);
+    SPI_POKE();
+    SPI_POKE();
+    SPI_POKE();
+    SPI_POKE();
+    SPI_POKE();
+    SPI_POKE();
+    SPI_POKE();
+    SPI_POKE();
+    SPI_POKE();
+    SPI_POKE();
     
     SD_SELECT();
         
@@ -68,6 +71,10 @@ void SD_Init(void) {
     } while (SD_Check8bitResponse(0x00) == false);
     
     SD_DESELECT();
+    
+    SD_Ready = true;
+    
+    return true;
 }
 
 //REQUIRES: SPI interface initialized using SPI_Init.
@@ -82,29 +89,29 @@ void SD_SendCommand(char CMD_6bit, char ARG3, char ARG2, char ARG1, char ARG0) {
     
     //First byte is 01XXXXXX, where X are the 6 command bits.
     ByteToSend = (CMD_6bit & 0x3F) | 0x40;
-    SPI_Write(ByteToSend);
+    SPI_WRITE(ByteToSend);
     UPDATE_CRC(Checksum, ByteToSend);
      
     //Next 4 bytes are the 32 argument bits.
     ByteToSend = ARG3;
-    SPI_Write(ByteToSend);
+    SPI_WRITE(ByteToSend);
     UPDATE_CRC(Checksum, ByteToSend);
     
     ByteToSend = ARG2;
-    SPI_Write(ByteToSend);
+    SPI_WRITE(ByteToSend);
     UPDATE_CRC(Checksum, ByteToSend);
     
     ByteToSend = ARG1;
-    SPI_Write(ByteToSend);
+    SPI_WRITE(ByteToSend);
     UPDATE_CRC(Checksum, ByteToSend);
     
     ByteToSend = ARG0;
-    SPI_Write(ByteToSend);
+    SPI_WRITE(ByteToSend);
     UPDATE_CRC(Checksum, ByteToSend);
     
     //Last byte is XXXXXXX1, where X are the 7 Cyclic Redundancy Check bits.
     ByteToSend = (Checksum << 1) | 0x01;
-    SPI_Write(ByteToSend);
+    SPI_WRITE(ByteToSend);
 }
 
 //REQUIRES: SPI interface initialized using SPI_Init.
@@ -116,14 +123,14 @@ void SD_Read8bitResponse(void) {
     
     //We don't know when the response will come, but the first bit is always
     //a zero. Read bytes until the response contains at least one zero.
-    do {readMessage = SPI_Read();} 
+    do { SPI_READ(readMessage);} 
     while (readMessage == 0xFF);   
     
     //Read the one message bytes into the global variable
     GLBL_Resp8 = readMessage;
     
     //Read once more and ignore the result.
-    SPI_Read();
+    SPI_POKE();
         
     return;
 }
@@ -145,18 +152,18 @@ void SD_Read40bitResponse(void) {
     
     //We don't know when the response will come, but the first bit is always
     //a zero. Read bytes until the response contains at least one zero.
-    do {readMessage = SPI_Read();} 
+    do { SPI_READ(readMessage);} 
     while (readMessage == 0xFF);   
     
     //Read the five message bytes into the global array
     GLBL_Resp40[0] = readMessage;
-    GLBL_Resp40[1] = SPI_Read();
-    GLBL_Resp40[2] = SPI_Read();
-    GLBL_Resp40[3] = SPI_Read();
-    GLBL_Resp40[4] = SPI_Read();
+     SPI_READ(GLBL_Resp40[1]);
+     SPI_READ(GLBL_Resp40[2]);
+     SPI_READ(GLBL_Resp40[3]);
+     SPI_READ(GLBL_Resp40[4]);
     
     //Read once more and ignore the result.
-    SPI_Read();
+    SPI_POKE();
     
     return;
 }
@@ -190,16 +197,16 @@ bool SD_WriteBlock(char ADDR3, char ADDR2, char ADDR1, char ADDR0) {
     if(SD_Check8bitResponse(0x00) == false) return false;
     
     //Write a few empty cycles to give the SD card time.
-    SPI_Write(0xFF);
-    SPI_Write(0xFF);
+    SPI_WRITE(0xFF);
+    SPI_WRITE(0xFF);
     
     //Write the Data Token to signify the start of the packet
-    SPI_Write(0xFE);
+    SPI_WRITE(0xFE);
     
     //Write the contents of the block write buffer.
     for(int i = 0; i < 512; i++)
     {
-        SPI_Write(GLBL_WriteBuffer[i]);
+        SPI_WRITE(GLBL_WriteBuffer[i]);
     }
     
     //Read the Data Response byte
@@ -234,7 +241,7 @@ bool SD_ReadBlock(char ADDR3, char ADDR2, char ADDR1, char ADDR0) {
     
     //We don't know when the SD card will start sending data, but the first byte
     //is always 0xFE. Read bytes until the response contains at least one zero.
-    do {readMessage = SPI_Read();} 
+    do { SPI_READ(readMessage);} 
     while (readMessage == 0xFF);   
 
     //If the message is anything but 0xFE, we cannot read.
@@ -242,26 +249,26 @@ bool SD_ReadBlock(char ADDR3, char ADDR2, char ADDR1, char ADDR0) {
     
     //Start reading bytes into the read buffer.
     for(int i = 0; i < 512; i++) {
-        GLBL_ReadBuffer[i] = SPI_Read();
+         SPI_READ(GLBL_ReadBuffer[i]);
     }
     
     //The next two bytes are the block's 16-bit CRC. We won't worry about it.
-    SPI_Read();
-    SPI_Read();
+    SPI_READ();
+    SPI_READ();
         
-    SPI_Read();
+    SPI_READ();
     
     //Read was a success, so return true.
     return true;
-}*/
+}
     
 bool SD_OpenBlock(long address) {
     
     //Send the block read command (CMD17) to the SD card.
     //The 32 bit argument is which 512-byte sector to read.
-    BlockAddress a = *((BlockAddress*)(&address));
+    BlockAddress *a = (BlockAddress*)(&address);
     
-    SD_SendCommand(17, a.a3, a.a2, a.a1, a.a0);
+    SD_SendCommand(17, a->a3, a->a2, a->a1, a->a0);
     
     //Wait for the SD card to respond to the command.
     SD_Read8bitResponse();
@@ -273,23 +280,24 @@ bool SD_OpenBlock(long address) {
     //Setup was a success, so return true.
     return true;
 }
+*/
 
 bool SD_CloseBlock() {
     //The next two bytes are the block's 16-bit CRC. We won't worry about it.
-    SPI_Read();
-    SPI_Read();
+    SPI_POKE();
+    SPI_POKE();
         
-    SPI_Read();
+    SPI_POKE();
     return true;
 }
 
 bool SD_OpenStream(long address) {
     
-    //Send the block read command (CMD17) to the SD card.
+    //Send the multiple block read command (CMD18) to the SD card.
     //The 32 bit argument is which 512-byte sector to read.
-    BlockAddress a = *((BlockAddress*)(&address));
+    BlockAddress *a = (BlockAddress*)(&address);
     
-    SD_SendCommand(18, a.a3, a.a2, a.a1, a.a0);
+    SD_SendCommand(18, a->a3, a->a2, a->a1, a->a0);
     
     //Wait for the SD card to respond to the command.
     SD_Read8bitResponse();
@@ -297,6 +305,9 @@ bool SD_OpenStream(long address) {
     //If the response is anything but 0x00, we cannot read.
     if(SD_Check8bitResponse(0x00) == false) return false;
     
+    char response = 0xFF;
+    while (response == 0xFF) SPI_READ(response);
+    if (response != 0xFE) error(OPEN_BLOCK);
     
     //Setup was a success, so return true.
     return true;
@@ -312,7 +323,7 @@ bool SD_CloseStream() {
     //If the response is anything but 0x00, we cannot read.
     if(SD_Check8bitResponse(0x00) == false) return false;
     
-    while (SPI_Read() == 0x00); // wait for a nonzero response to indicate ready
+    do SPI_POKE() while(SSP1BUF == 0x00); // wait for a nonzero response to indicate ready
     
     return true;
 }

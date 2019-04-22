@@ -2,7 +2,7 @@
 
 Brass2Go is a engineering design project for the second-year course ENEL 300, Electrical and Computer Engineering Professional Skills, at the University of Calgary.
 
-Brass2Go is a portable device that allows brass musicians to practice their instruments and compositions on-the-go. The device, powered by a PIC16F1778 microcontroller, plays an audio (.wav) file from a microSD card and the user plays the finger sequence along with the song. If the user plays the note incorrectly (i.e. the wrong note and/or at the wrong time) a red LED will light up. Contrastly, a green LED will light up if the note is played correctly. Once the file is finished playing, an LCD screen will display the number of notes played incorrectly, and the percent of notes played correctly (e.g. 5/26 wrong -- 80.7% correct). During playback, the user can pause and play 
+Brass2Go is a portable device that allows brass musicians to practice their instruments and compositions on-the-go. The device, powered by a PIC16F1778 microcontroller, plays an audio (.wav) file from a microSD card and the user plays the finger sequence along with the song. If the user plays the note incorrectly (i.e. the wrong note and/or at the wrong time) a red LED will light up. Contrastly, a green LED will light up if the note is played correctly. Once the file is finished playing, an LCD screen will display the number of notes played incorrectly, and the percent of notes played correctly (e.g. 5/26 wrong -- 80.7% correct). During playback, the user can pause and play
 
 
 The audio file must have the button/valve press data encoded, which can be done with the Python 3 script [formatter.py](https://github.com/usmanziak/Brass2Go/blob/master/audio/formatter.py).
@@ -97,13 +97,12 @@ pip install mido
 
 
 
-## Formatting and loading files
+## Formatting and Loading Files
   Assuming all prerequisite software is installed on your machine, and that you have correctly created your MIDI (.mid) and audio (.wav) files, follow the following steps to add it to the SD card. As an example, we will format and upload  ```chromatic.mid ``` and ```chromatic.wav``` (located in the ```~\Desktop\Brass2Go\audio``` folder) on a Windows 10 machine.
 
   1. Add the .mid and .wav files to the ```\Brass2Go\audio``` folder, and navigate to that directory using the command ```cd 'PATH TO Brass2Go\audio' ```
 
   2. Run the Python 3 script using the command ```python formatter.py audio_file.wav MIDI_file.mid```
-  
 
    <img src="https://i.imgur.com/DdmZWhn.jpg" alt="Step 2" width="400"/>
 
