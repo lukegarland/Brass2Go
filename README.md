@@ -1,8 +1,8 @@
 # Brass2Go
 
-Brass2Go is a engineering design project for the second-year course ENEL 300, Electrical and Computer Engineering Professional Skills, at the University of Calgary.
+Brass2Go is an Engineering design project for the second-year course ENEL 300, Electrical and Computer Engineering Professional Skills, at the University of Calgary.
 
-Brass2Go is a portable device that allows brass musicians to practice their instruments and compositions on-the-go. The device, powered by a PIC16F1778 microcontroller, plays an audio (.wav) file from a microSD card and the user plays the finger sequence along with the song. If the user plays the note incorrectly (i.e. the wrong note and/or at the wrong time) a red LED will light up. Contrastly, a green LED will light up if the note is played correctly. Once the file is finished playing, an LCD screen will display the number of notes played incorrectly, and the percent of notes played correctly (e.g. 5/26 wrong -- 80.7% correct). During playback, the user can pause and play
+Brass2Go is a portable device that allows brass musicians to practice their instruments and compositions on-the-go. The device, powered by a PIC16F1778 microcontroller, plays an audio (.wav) file from a microSD card and the user plays the finger sequence along with the song. If the user plays the note incorrectly (i.e. the wrong note and/or at the wrong time) a red LED will light up. Contrastly, a green LED will light up if the note is played correctly. Once the file is finished playing, an LCD screen will display the number of notes played incorrectly, and the percent of notes played correctly (e.g. 5/26 wrong -- 80.7% correct) which helps the user improve at a particular song of their choice. During playback, the user can pause and play as well. 
 
 
 The audio file must have the button/valve press data encoded, which can be done with the Python 3 script [formatter.py](https://github.com/usmanziak/Brass2Go/blob/master/audio/formatter.py).
@@ -129,6 +129,10 @@ pip install mido
 * **Usman Zia** - [Github](https://github.com/usmanziak)
 
 See also the list of [contributors](https://github.com/usmanziak/Brass2Go/graphs/contributors) who participated and the project's [commit history](https://github.com/usmanziak/Brass2Go/commits/master).
+
+Note: To view full product documentation please access the [Product Documentation](https://github.com/usmanziak/Brass2Go/blob/master/BRASS2GO-Documentation.docx)
+
+Moreover, check out the final product demonstration slides which includes Product Background and Project Management techniques used throughout product development. [Demonstration](https://github.com/usmanziak/Brass2Go/blob/master/Brass2Go_Final_Presentation.pptx)
 
 ## License
 
