@@ -39,7 +39,7 @@ The hardware used for this device is:
 
 The following is the circuit schematic of the final design:
 
-![](schematic/b2g-schematic.png)
+![](schematic/b2g-schematic.PNG)
 
 
 The following is an image of the breadboard prototype:
